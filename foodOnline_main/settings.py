@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +101,10 @@ DATABASES = {
     }
 }
 
+# SET USER_AUTHENTICATION MODEL INSTEAD OF DJANGO DEFAULT
+
+AUTH_USER_MODEL = 'accounts.User'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -137,13 +142,33 @@ USE_TZ = True
 
 # Change by Bishu to access static folder to get access resources with this
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR /'static'
 # Set the path of static folder
 STATICFILES_DIRS = [
     'foodOnline_main/static'
 ]
+
+# Media File Configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR /'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# To change the default tags for a message level (either built-in or custom), 
+# set the MESSAGE_TAGS setting to a dictionary containing the levels you wish to change. 
+# As this extends the default tags, you only need to provide tags for the levels you wish to override:
+
+from django.contrib.messages import constants as messages
+
+# MESSAGE_TAGS = {
+#     messages.INFO: "",
+#     50: "critical",
+# }
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger', # danger is bootstrap class
+}

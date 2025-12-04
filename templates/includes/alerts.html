@@ -1,0 +1,13 @@
+{% if messages %}
+    {% for msg in messages %}
+        <!-- alert alert-success is come from bootstar, show-notification is come from custom.css -->
+        <!-- <div class="alert alert-success show-notification" role="alert">  -->
+        <div class="alert alert-{{msg.tags}} show-notification" role="alert"> 
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong>{{msg}}</strong>
+            
+        </div>
+    {% endfor %}
+{% endif %}
