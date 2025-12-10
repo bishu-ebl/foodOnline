@@ -32,4 +32,3 @@ def pre_save_profile_receiver(sender, instance, **kwargs):
 
 
 #post_save.connect(post_save_create_profile_receiver, sender=User) # instead we can use decorator. 
-

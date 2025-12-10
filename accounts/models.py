@@ -47,11 +47,11 @@ class UserManager(BaseUserManager):
 # There is another method call AbstarctUser which will only addtion fields in the model, not any control. 
 # by AbstractBaseUser method we can set for example email addess is the login option
 class User(AbstractBaseUser):
-    RETAURANT = 1
+    VENDOR = 1
     CUSTOMER = 2
     ROLE_CHOICE = (
-        (RETAURANT, 'restaurant'),
-        (CUSTOMER, 'customer'),
+        (VENDOR, 'Vendor'),
+        (CUSTOMER, 'Customer'),
     )
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -111,4 +111,3 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.email
-
