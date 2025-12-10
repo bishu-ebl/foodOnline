@@ -87,6 +87,16 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+    
+    # This function is use to get and check the user role. 
+    # Accordingly user will redirect to the set dashboard
+
+    def get_role(self):
+        if self.role == 1:
+            user_role = 'Vendor'
+        elif self.role == 2:
+            user_role = 'Customer'
+        return user_role
 
 class UserProfile(models.Model):
     # ForeignKey is used when One use can have multiple profile
