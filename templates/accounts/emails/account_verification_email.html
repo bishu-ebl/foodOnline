@@ -1,0 +1,9 @@
+<!-- this autoescape means we trust the value from where it is coming, tha mean we just token that created-->
+{% autoescape off %}
+
+Hi {{user.first_name}}
+
+please click on below link to activate your registration.
+http://{{domain}}{% url 'activate' uidb64=uid token=token %}
+
+{% endautoescape %}
