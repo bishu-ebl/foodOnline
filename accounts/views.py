@@ -3,6 +3,7 @@ from django.http import HttpResponse
 
 from accounts.utils import detectUser, send_verification_email
 from vendor.forms import VendorForm
+from vendor.models import Vendor
 from .forms import UserForm
 from .models import User, UserProfile
 from django.contrib import messages, auth
@@ -185,6 +186,13 @@ def custDashboard(request):
 # User logged in as vendor role can see the page
 @user_passes_test(check_role_vendor)
 def vendorDashboard(request):
+    # user=request.user, because only the logged in user can have access to the page
+    # vendor = Vendor.objects.get(user=request.user)
+    # context = {
+    #     'vendor': vendor,
+    # }
+    # return render(request, 'accounts/vendorDashboard.html', context)
+    # instead of passing context in the return, we call context_processors here 
     return render(request, 'accounts/vendorDashboard.html')
 
 # This section is to handle forgot password
