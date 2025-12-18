@@ -1,8 +1,9 @@
-# The purpose of context proccesssor is to enable accessable vendor model objects like cover photo,
+# The purpose of context proccesssor is to enable access vendor model objects like cover photo,
 # profile picture etc to all html objects.
-# Context processor is a function that only take argument as request and return dictionary 
+# Context processor is a function that only take one argument as request and return dictionary 
 # that get addded to the context. The following function take vendor as request asd pass it this function as argument
 
+from django.conf import settings
 from vendor.models import Vendor
 
 
@@ -13,3 +14,8 @@ def get_vendor(request):
     except:
         vendor = None
     return dict(vendor = vendor)
+
+# This function is to enable access GOOGLE_API_KEY from html pages
+
+def get_google_api(request):
+    return {'GOOGLE_API_KEY': settings.GOOGLE_API_KEY}
