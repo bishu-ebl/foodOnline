@@ -3,10 +3,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
 from accounts.views import check_role_vendor
+from menu.forms import CategoryForm
+from menu.models import Category, FoodItem
 from vendor.models import Vendor
 from .forms import VendorForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
+from django.template.defaultfilters import slugify
+
+def get_vendor(request):
+    vendor = Vendor.objects.get(user=request.user)
+    return vendor
 
 # Create your views here.
 @login_required(login_url='login')
@@ -38,3 +45,80 @@ def vprofile(request):
         'vendor': vendor,
     }
     return render(request, 'vendor/vprofile.html', context)
+
+# Menu Builder function started here
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def menu_builder(request):
+    # vendor = Vendor.objects.get(user=request.user) # By this we will get the logged in vendor. 
+    vendor = get_vendor(request)
+    # Get all categories of this vendor. get method is use for single resultset. 
+    # To get multiple result set we have to use either filter method or all method.
+    # Here we user filter method to all categories of a particular vendor. A vendor can have multipls food categories
+    categories = Category.objects.filter(vendor=vendor).order_by('created_at')
+    context = {
+        'categories': categories,
+    }
+    return render(request, 'vendor/menu_builder.html', context)
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def fooditems_by_category(request,pk=None):
+    vendor = get_vendor(request)
+    category = get_object_or_404(Category, pk=pk)
+    fooditems = FoodItem.objects.filter(vendor=vendor, category=category)
+    # print(fooditems)
+    context = {
+        'fooditems': fooditems,
+        'category': category,
+    }
+    return render(request, 'vendor/fooditems_by_category.html',context)
+
+def add_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST) # this request.POST will have category_name, desription recived from form
+        if form.is_valid():
+            category_name = form.cleaned_data['category_name']
+            category = form.save(commit=False)
+            category.vendor = get_vendor(request) # Assign the logged in user in category field
+            category.slug = slugify(category_name) # category_name actuall came from user input. for that we need to use cleaned_data method as above
+            form.save()
+            messages.success(request, 'Category added successfully!')
+            return redirect('menu_builder')
+        else:
+            print(form.errors)
+    else:
+        form = CategoryForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'vendor/add_category.html', context)
+
+def edit_category(request,pk=None):
+    category = get_object_or_404(Category,pk=pk) # Based on the primary key pass for form we will get category instance
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category) # this request.POST will have category_name, desription recived from form
+        if form.is_valid():
+            category_name = form.cleaned_data['category_name']
+            category = form.save(commit=False)
+            category.vendor = get_vendor(request) # Assign the logged in user/vendor in category field
+            category.slug = slugify(category_name) # category_name actually came from user input. for that we need to use cleaned_data method as above
+            form.save()
+            messages.success(request, 'Category updated successfully!')
+            return redirect('menu_builder')
+        else:
+            print(form.errors)
+    else:
+        # form = CategoryForm()
+        form = CategoryForm(instance=category)
+    context = {
+        'form': form,
+        'category': category,
+    }
+    return render(request, 'vendor/edit_category.html',context)
+
+def delete_category(request,pk=None):
+    category = get_object_or_404(Category,pk=pk)
+    category.delete()
+    messages.success(request, 'Category has been deleted successfully!')
+    return redirect('menu_builder')
