@@ -23,10 +23,17 @@ from django.urls import path, include
 from . import views # this . means current directory
 from django.conf import settings
 from django.conf.urls.static import static
+from marketplace import views as MarketplaceView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'), # URL path for home page
     #path('accounts/', include('accounts.urls')),
     path('', include('accounts.urls')),
+
+    # URL to route to marketplace
+    path('marketplace/', include('marketplace.urls')),
+
+    # CART
+    path('cart/', MarketplaceView.cart, name='cart'),
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)

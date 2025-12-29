@@ -7,6 +7,9 @@ class Vendor(models.Model):
     user = models.OneToOneField(User, related_name='user', on_delete=models.CASCADE)
     user_profile = models.OneToOneField(UserProfile, related_name='userprofile', on_delete=models.CASCADE)
     vendor_name = models.CharField(max_length=50)
+    # Add slug field in Vendor Model.Sluging vendor_name/Restaurant name 
+    # is required to show the list of food item for a particular vendor from marketplace view
+    vendor_slug = models.SlugField(max_length=100, unique=True)
     vendor_license = models.ImageField(upload_to='vendor/license') # it goes to media folder
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
