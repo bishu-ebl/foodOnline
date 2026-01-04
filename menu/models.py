@@ -5,7 +5,9 @@ from vendor.models import Vendor
 
 class Category(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
-    category_name = models.CharField(max_length=50, unique=True)
+    # unique=true has to be remove and migrate the database to avoid duplicate category_name.
+    category_name = models.CharField(max_length=50)
+    #category_name = models.CharField(max_length=50, unique=True)
     # slug refer to the url pattern of category_name, like if category is sea food then slug will sea-food
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(max_length=250, blank=True)

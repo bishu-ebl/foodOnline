@@ -1,5 +1,5 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.views import check_role_customer
 from marketplace.context_processors import get_cart_amounts, get_cart_counter
@@ -8,6 +8,10 @@ from menu.models import Category, FoodItem
 from django.db.models import Prefetch
 from .models import Cart
 from django.contrib.auth.decorators import login_required,user_passes_test
+from django.db.models import Q
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.measure import D  # ``D`` is a shortcut for ``Distance``
+from django.contrib.gis.db.models.functions import Distance
 
 # Create your views here.
 
@@ -141,3 +145,42 @@ def delete_cart(request,cart_id):
                 return JsonResponse({'status':'Failed', 'message': 'Cart item does not exists!'})
         else:
             return JsonResponse({'status':'Failed', 'message': 'Invalid Request'})
+        
+
+def search(request):
+    if not 'address' in request.GET:
+        return redirect('marketplace')
+    else:
+        address = request.GET['address'] # address point to the name parameter of home.html
+        latitude = request.GET['lat']
+        longitude = request.GET['lng']
+        radius = request.GET['radius']
+        keyword = request.GET['keyword']
+        # print(r_name,address, latitude, longitude, radius)
+
+        # Filter the search with parameter like restaurant/vendor name, is_approved and user is active
+        #vendors = Vendor.objects.filter(vendor_name__icontains=keyword, is_approved=True, user__is_active=True)
+        # get the list of restaurant that has food item user looking for
+        fetch_vendors_by_fooditems = FoodItem.objects.filter(food_title__icontains=keyword, is_available=True).values_list('vendor',flat=True)
+        # print(fetch_vendors_by_fooditems)
+        # To filter the data with or condition we need to use Q object as follows
+        vendors = Vendor.objects.filter(Q(id__in=fetch_vendors_by_fooditems) | Q(vendor_name__icontains=keyword, is_approved=True, user__is_active=True))
+
+        if latitude and longitude and radius:
+            pnt = GEOSGeometry('POINT(%s %s)' %(longitude, latitude))
+            # Find restaurant nearby location. Since we do not have any distance model, we will use annotate here
+            vendors = Vendor.objects.filter(Q(id__in=fetch_vendors_by_fooditems) | Q(vendor_name__icontains=keyword, is_approved=True, user__is_active=True), 
+                                            user_profile__location__distance_lte=(pnt, D(km=radius))
+                                            ).annotate(distance_km=Distance("user_profile__location", pnt)).order_by("distance_km")
+        for v in vendors:
+            v.kms = round(v.distance_km.km, 1)
+        vendor_count = vendors.count()
+        print(address)
+
+        context = {
+            'vendors': vendors,
+            'vendor_count': vendor_count,
+            'source_location': address,
+        }
+
+        return render(request,'marketplace/listings.html', context)

@@ -83,8 +83,11 @@ def add_category(request):
             category_name = form.cleaned_data['category_name']
             category = form.save(commit=False)
             category.vendor = get_vendor(request) # Assign the logged in user in category field
-            category.slug = slugify(category_name) # category_name actuall came from user input. for that we need to use cleaned_data method as above
-            form.save()
+            
+            category.save() # Here categery_id will generated
+            category.slug = slugify(category_name)+'-'+str(category.id) # category_name actuall came from user input. for that we need to use cleaned_data method as above
+            category.save()
+            
             messages.success(request, 'Category added successfully!')
             return redirect('menu_builder')
         else:

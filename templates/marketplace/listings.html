@@ -52,6 +52,12 @@
 												    {% endif %}
 													<!-- <span class="post-categories"><span>Type of food :
 														</span> Apple Juice</span> -->
+													{% if source_location %}
+													<br>
+													<span>
+														<small><b>{{vendor.kms}}km</b> away from {{source_location}}</small>
+													</span>
+													{% endif %}
 												</div>
 												<div class="list-option">
 
