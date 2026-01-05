@@ -88,9 +88,9 @@
 										<figure>
 											<!-- This vendor.user_profile.profile_picture statement is pointed to profile_picture in UserProfile model-->
 											{% if vendor.user_profile.profile_picture %}
-												<a href="#"><img src="{{vendor.user_profile.profile_picture.url}}" class="attachment-full size-full wp-post-image" alt=""></a>
+												<a href="{% url 'vendor_detail' vendor.vendor_slug %}"><img src="{{vendor.user_profile.profile_picture.url}}" class="attachment-full size-full wp-post-image" alt=""></a>
 											{% else %}
-												<a href="#"><img src="{% static 'images/default-profile.PNG' %}" class="attachment-full size-full wp-post-image" alt=""></a>
+												<a href="{% url 'vendor_detail' vendor.vendor_slug %}"><img src="{% static 'images/default-profile.PNG' %}" class="attachment-full size-full wp-post-image" alt=""></a>
 											{% endif %}
 										</figure>
 									</li>
@@ -155,7 +155,7 @@
 										<div class="list-post featured">
 											<div class="img-holder">
 												<figure>
-													<a href="#">
+													<a href="{% url 'vendor_detail' vendor.vendor_slug %}">
 														{% if vendor.user_profile.profile_picture %}
 															<img src="{{vendor.user_profile.profile_picture.url}}" class="attachment-full size-full wp-post-image" alt="">
 														{% else %}
@@ -176,13 +176,18 @@
 												</div> -->
 												<div class="post-title">
 													<h5>
-														<a href="listing-detail.html">{{vendor.vendor_name}}</a>
+														<a href="{% url 'vendor_detail' vendor.vendor_slug %}">{{vendor.vendor_name}}</a>
 														<!-- <span class="sponsored text-color">Sponsored</span> -->
 													</h5>
 												</div>
 												<!-- <address> <span>Type of food : </span> Apple Juice</address> -->
 												 {% if vendor.user_profile.city and vendor.user_profile.state %}
 												 <span>{{vendor.user_profile.city}}, {{vendor.user_profile.state}}, {{vendor.user_profile.pin_code}}</span>
+												 {% endif %}
+
+												 {% if vendor.kms %}
+													<br>
+													<span><small><b>{{ vendor.kms }}</b>away</small></span>
 												 {% endif %}
 											</div>
 											

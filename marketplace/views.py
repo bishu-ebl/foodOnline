@@ -168,14 +168,14 @@ def search(request):
 
         if latitude and longitude and radius:
             pnt = GEOSGeometry('POINT(%s %s)' %(longitude, latitude))
-            # Find restaurant nearby location. Since we do not have any distance model, we will use annotate here
+            # Find restaurant nearby location. Since we do not have any distance field in model, we will use annotate here
             vendors = Vendor.objects.filter(Q(id__in=fetch_vendors_by_fooditems) | Q(vendor_name__icontains=keyword, is_approved=True, user__is_active=True), 
                                             user_profile__location__distance_lte=(pnt, D(km=radius))
                                             ).annotate(distance_km=Distance("user_profile__location", pnt)).order_by("distance_km")
-        for v in vendors:
-            v.kms = round(v.distance_km.km, 1)
-        vendor_count = vendors.count()
-        print(address)
+            for v in vendors:
+                v.kms = round(v.distance_km.km, 1)
+            vendor_count = vendors.count()
+            # print(address)
 
         context = {
             'vendors': vendors,
