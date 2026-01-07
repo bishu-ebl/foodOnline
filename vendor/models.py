@@ -34,14 +34,15 @@ class Vendor(models.Model):
 
         is_open = None
         for i in current_opening_hours:
-            start = str(datetime.strptime(i.from_hour, '%I:%M %p').time())
-            end = str(datetime.strptime(i.to_hour, '%I:%M %p').time())
-            # print(start, end)
-            if current_time > start and current_time < end :
-                is_open = True
-                break # break is used here if the vendor have multiple time in a day but open for anyone then exit from if condition
-            else:
-                is_open = False
+            if not i.is_closed:
+                start = str(datetime.strptime(i.from_hour, '%I:%M %p').time())
+                end = str(datetime.strptime(i.to_hour, '%I:%M %p').time())
+                # print(start, end)
+                if current_time > start and current_time < end :
+                    is_open = True
+                    break # break is used here if the vendor have multiple time in a day but open for anyone then exit from if condition
+                else:
+                    is_open = False
         return is_open
     
     # This save function will triggered whenever we actually press the save button
