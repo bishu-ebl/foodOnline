@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import User, UserProfile
 from accounts.utils import send_notification
+from datetime import date, datetime, time
 
 # Create your models here.
 class Vendor(models.Model):
@@ -17,6 +18,31 @@ class Vendor(models.Model):
 
     def __str__(self):
         return self.vendor_name
+    
+    # Create a member function to check whther the vendor is open or not
+    # this is_open function will exactly work as vendor model database field
+
+    def is_open(self):
+        # Check opening hour for current day
+        to_day = date.today()
+        today= to_day.isoweekday()
+        current_opening_hours = OpeningHour.objects.filter(vendor=self, day=today)
+
+        # Current Time to check whether the vandor is open or closed
+        now = datetime.now()
+        current_time = now.strftime('%H:%M:%S')
+
+        is_open = None
+        for i in current_opening_hours:
+            start = str(datetime.strptime(i.from_hour, '%I:%M %p').time())
+            end = str(datetime.strptime(i.to_hour, '%I:%M %p').time())
+            # print(start, end)
+            if current_time > start and current_time < end :
+                is_open = True
+                break # break is used here if the vendor have multiple time in a day but open for anyone then exit from if condition
+            else:
+                is_open = False
+        return is_open
     
     # This save function will triggered whenever we actually press the save button
     # * args- arguments, **kwargs- Keyword arguments
@@ -42,3 +68,31 @@ class Vendor(models.Model):
                     send_notification(mail_subject, mail_template, context)
         # This super fuction is actually allow you to access save method of class Vendor
         return super(Vendor,self).save(*args, **kwargs)
+    
+DAYS = [
+    (1, ('MONDAY')),
+    (2, ('TUESDAY')),
+    (3, ('WEDNESDAY')),
+    (4, ('THURSDAY')),
+    (5, ('FRIDAY')),
+    (6, ('SATURDAY')),
+    (7, ('SUNDAY')),
+]
+    
+HOUR_DAY_24 = [(time(h, m).strftime('%I:%M %p'), time(h, m).strftime('%I:%M %p')) for h in range(0, 24) for m in (0, 30)] # List Comprehension
+
+class OpeningHour(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    day = models.IntegerField(choices=DAYS)
+    from_hour = models.CharField(choices=HOUR_DAY_24, max_length=10, blank=True)
+    to_hour = models.CharField(choices=HOUR_DAY_24, max_length=10, blank=True)
+    is_closed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('day', '-from_hour') # add - here to show the time in asending order
+        unique_together = ('vendor', 'day', 'from_hour','to_hour')
+
+    def __str__(self):
+        # It is django in-build function to show string representation of day, where day is the day field name in the model
+        # This method will show the label/Name of the day instead of interger representation
+        return self.get_day_display() 
