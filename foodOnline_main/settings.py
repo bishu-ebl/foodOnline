@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config
 import os
+from django import conf
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,11 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'accounts',
     'vendor',
     'menu',
     'marketplace',
     'django.contrib.gis',
+    'customers',
 ]
 
 MIDDLEWARE = [
@@ -54,11 +57,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    ]
 
 ROOT_URLCONF = 'foodOnline_main.urls'
 
-TEMPLATES = [
+""" TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': ['templates'], # Set this configuration to include template folder.
@@ -72,6 +75,28 @@ TEMPLATES = [
                 'accounts.context_processors.get_google_api',
                 'marketplace.context_processors.get_cart_counter',
                 'marketplace.context_processors.get_cart_amounts',
+                'accounts.context_processors.get_user_profile',
+            ],
+        },
+    },
+] """
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.get_vendor',
+                'accounts.context_processors.get_google_api',
+                'marketplace.context_processors.get_cart_counter',
+                'marketplace.context_processors.get_cart_amounts',
+                'accounts.context_processors.get_user_profile',
             ],
         },
     },
@@ -102,7 +127,7 @@ DATABASES = {
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.postgresql',
+        # 'ENGINE': 'django.db.backends.postgresql',
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
@@ -154,12 +179,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR /'static'
-# Set the path of static folder
 STATICFILES_DIRS = [
     'foodOnline_main/static'
 ]
 
-# Media File Configuration
+# Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
 
@@ -172,15 +196,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # set the MESSAGE_TAGS setting to a dictionary containing the levels you wish to change. 
 # As this extends the default tags, you only need to provide tags for the levels you wish to override:
 
-from django.contrib.messages import constants as messages
+# from django.contrib.messages import constants as messages
 
 # MESSAGE_TAGS = {
 #     messages.INFO: "",
 #     50: "critical",
 # }
 
+from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
-    messages.ERROR: 'danger', # danger is bootstrap class
+    messages.ERROR: 'danger',
 }
 
 # Email configuration
@@ -196,6 +221,7 @@ DEFAULT_FROM_EMAIL = 'foodOnline Marketplace <bishu.ebl@gmail.com>'
 # Settings Google API Key
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
+# This is is for GDAL configuration
 os.environ['PATH'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo') + ';' + os.environ['PATH']
 os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/data/proj') + ';' + os.environ['PATH']
 GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env/Lib/site-packages/osgeo/gdal.dll')

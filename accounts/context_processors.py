@@ -5,6 +5,7 @@
 
 from django.conf import settings
 from vendor.models import Vendor
+from .models import UserProfile
 
 
 def get_vendor(request):
@@ -15,7 +16,13 @@ def get_vendor(request):
         vendor = None
     return dict(vendor = vendor)
 
-# This function is to enable access GOOGLE_API_KEY from html pages
+def get_user_profile(request):
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+    except:
+        user_profile = None
+    return dict(user_profile=user_profile)
 
+# This function is to enable access GOOGLE_API_KEY from html pages
 def get_google_api(request):
     return {'GOOGLE_API_KEY': settings.GOOGLE_API_KEY}

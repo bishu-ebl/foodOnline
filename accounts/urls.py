@@ -23,5 +23,8 @@ urlpatterns=[
     path('reset_password/', views.reset_password, name='reset_password'),
 
     # Vendor dashboard related URLS
-    path('vendor/', include('vendor.urls'))
+    path('vendor/', include('vendor.urls')),
+
+    # Forwording customers url
+    path('customer/', include('customers.urls')),
 ]

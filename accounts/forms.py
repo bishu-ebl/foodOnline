@@ -3,7 +3,7 @@ from .models import User, UserProfile
 from .validators import allow_only_image_validator
 
 # This call will inherit Modelform from django forms
-# 
+# This form is for registering user
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
     confirm_password = forms.CharField(widget=forms.PasswordInput()) # We need to create this field because model do not have this field
@@ -48,3 +48,10 @@ class UserProfileForm(forms.ModelForm):
         for field in self.fields:
             if field == 'latitude' or field == 'longitude':
                 self.fields[field].widget.attrs['readonly'] = 'readonly'
+
+# This is for setting profile when customer logged in
+class UserInfoForm(forms.ModelForm):
+    class Meta:
+        model = User # Define user model from where you want to access the fields
+        #fields = ['first_name', 'last_name', 'username', 'email', 'phone_number','password']   # Define which are the feild from the model you want to access in the form
+        fields = ['first_name', 'last_name', 'phone_number']
