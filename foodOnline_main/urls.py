@@ -38,5 +38,11 @@ urlpatterns = [
     path('cart/', MarketplaceView.cart, name='cart'),
     # SEARCH URL
     path('search/', MarketplaceView.search,name='search'),
+
+    # CKECKOUT
+    path('checkout/', MarketplaceView.checkout, name='checkout'),
+
+    # ORDERS
+    path('orders/', include('orders.urls')),
     
 ] + static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)

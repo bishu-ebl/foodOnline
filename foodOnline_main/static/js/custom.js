@@ -305,7 +305,7 @@ $(document).ready(function(){
     $(document).on('click', '.remove_hour', function(e){
         e.preventDefault();
         url = $(this).attr('data-url');
-        console.log(url);
+        //console.log(url);
 
         $.ajax({
             type: 'GET',

@@ -1,0 +1,10 @@
+<!-- this autoescape means we trust the value from where it is coming, tha mean we just token that created-->
+{% autoescape off %}
+
+Hi {{user.first_name}}
+
+Thank you for your order. Here is the Ordered Details:
+Order Number: {{ order.order_number }}
+Transaction ID : {{ order.payment.transaction_id }}
+
+{% endautoescape %}
