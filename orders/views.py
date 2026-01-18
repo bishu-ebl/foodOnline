@@ -9,6 +9,11 @@ from orders.models import Order, OrderedFood, Payment
 import simplejson as json
 from .utils import generate_order_umber
 from accounts.utils import send_notification
+import razorpay
+from foodOnline_main.settings import RZP_KEY_ID, RZP_KEY_SECRET
+from django.contrib.sites.shortcuts import get_current_site
+
+client = razorpay.Client(auth=(RZP_KEY_ID, RZP_KEY_SECRET))
 
 # Create your views here.
 @login_required(login_url = 'login')
@@ -46,6 +51,29 @@ def place_order(request):
             order.save() # Generate order.id/pk 
             order.order_number = generate_order_umber(order.id)
             order.save()
+
+            # # RazorPay Payment
+            # DATA = {
+            #     "amount": float(order.total) * 100,
+            #     "currency": "INR",
+            #     "receipt": "receipt #"+order.order_number,
+            #     "notes": {
+            #         "key1": "value3",
+            #         "key2": "value2"
+            #     }
+            # }
+            # rzp_order = client.order.create(data=DATA)
+            # print(rzp_order)
+            # rzp_order_id = rzp_order['id']
+
+            # context = {
+            #     'order': order,
+            #     'cart_items': cart_items,
+            #     'rzp_order_id': rzp_order_id,
+            #     'RZP_KEY_ID': RZP_KEY_ID,
+            #     'rzp_amount': float(order.total) * 100,
+            # }
+
             context = {
                 'order': order,
                 'cart_items': cart_items,                
