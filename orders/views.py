@@ -3,7 +3,8 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
 from marketplace.context_processors import get_cart_amounts
-from marketplace.models import Cart
+from marketplace.models import Cart, Tax
+from menu.models import FoodItem
 from orders.forms import OrderForm
 from orders.models import Order, OrderedFood, Payment
 import simplejson as json
@@ -23,11 +24,48 @@ def place_order(request):
     if cart_count <=0:
         return redirect('marketplace')
     
+    vendors_ids = []
+    for i in cart_items:
+        if i.fooditem.vendor.id not in vendors_ids:
+            vendors_ids.append(i.fooditem.vendor.id)
+
+    # print(vendors_ids)
+
+    # {"vendor_id":{"subtotal":{"tax_type": {"tax_percentage": "tax_amount"}}}}
+    get_tax = Tax.objects.filter(is_active=True)
+    subtotal = 0
+    total_data = {}
+    k = {}
+    for i in cart_items:
+        fooditem = FoodItem.objects.get(pk=i.fooditem.id, vendor_id__in=vendors_ids)
+        # print(fooditem, fooditem.vendor.id)
+        v_id = fooditem.vendor.id
+        if v_id in k:
+            subtotal = k[v_id]
+            subtotal += (fooditem.price * i.quantity)
+            k[v_id] = subtotal
+        else:
+            subtotal = (fooditem.price * i.quantity)
+            k[v_id] = subtotal
+
+        # print(k)
+        # print(subtotal)
+    
+        # Calculate the tax_data
+        tax_dict = {}
+        for i in get_tax:
+            tax_type = i.tax_type
+            tax_percentage = i.tax_percentage
+            tax_amount = round((tax_percentage * subtotal)/100, 2)
+            tax_dict.update({tax_type: {str(tax_percentage) : str(tax_amount)}})
+        # Construct total data
+        total_data.update({fooditem.vendor.id: {str(subtotal): str(tax_dict)}})
+    
     subtotal = get_cart_amounts(request)['subtotal']
     total_tax = get_cart_amounts(request)['tax']
     grand_total = get_cart_amounts(request)['grand_total']
     tax_data = get_cart_amounts(request)['tax_dict']
-    print(subtotal,total_tax,grand_total,tax_data)
+    # print(subtotal,total_tax,grand_total,tax_data)
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
@@ -46,10 +84,12 @@ def place_order(request):
             order.total = grand_total
             # order.tax_data = tax_data
             order.tax_data = json.dumps(tax_data)
+            order.total_data = json.dumps(total_data)
             order.total_tax = total_tax
             order.payment_method = request.POST['payment_method']
             order.save() # Generate order.id/pk 
             order.order_number = generate_order_umber(order.id)
+            order.vendors.add(*vendors_ids) # * is used to add all vendors recursively
             order.save()
 
             # # RazorPay Payment
@@ -79,7 +119,7 @@ def place_order(request):
                 'cart_items': cart_items,                
             }
             # return redirect('place_order')
-            return render(request, 'orders/place_order.html', context) # Render to this page bcz to catch the oreder_number
+            return render(request, 'orders/place_order.html', context) # Render to this page to catch the oreder_number
         else:
             print(form.errors)
     return render(request, 'orders/place_order.html')
